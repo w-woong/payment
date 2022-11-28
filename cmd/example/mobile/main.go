@@ -165,6 +165,8 @@ func main() {
 			return
 		}
 		fmt.Println(apprRes)
+
+		refund(apprRes)
 	})
 
 	// router.HandleFunc("/pay", func(w http.ResponseWriter, r *http.Request) {

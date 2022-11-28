@@ -243,9 +243,9 @@ type RefundRequest struct {
 	ModType     string `json:"mod_type"`
 	Tno         string `json:"tno"`
 
-	ModMny  string `json:"mod_mny"`
-	RemMny  string `json:"rem_mny"`
-	ModDesc string `json:"mod_desc"`
+	ModMny  string `json:"mod_mny,omitempty"`
+	RemMny  string `json:"rem_mny,omitempty"`
+	ModDesc string `json:"mod_desc,omitempty"`
 }
 
 type RefundResponse struct {
