@@ -2,7 +2,15 @@ package usecase
 
 import (
 	"context"
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/w-woong/payment/dto/kcpdto"
 	"github.com/w-woong/payment/port"
@@ -16,12 +24,26 @@ type payKcpUsc struct {
 	allowedPayMethod string
 	returnUrl        string
 	escwUsedYN       string
+	privateKeyPath   string
+	privateKey       *rsa.PrivateKey
 }
 
-func NewPayKcpUsc(svc port.PayKcpSvc) *payKcpUsc {
-	return &payKcpUsc{
-		svc: svc,
+func NewPayKcpUsc(svc port.PayKcpSvc, siteCd, kcpCertInfo, allowedPayMethod, returnUrl string,
+	privateKeyPath string) (*payKcpUsc, error) {
+
+	pkey, err := loadDecryptedPrivateKey(privateKeyPath)
+	if err != nil {
+		return nil, err
 	}
+	return &payKcpUsc{
+		svc:            svc,
+		siteCd:         siteCd,
+		kcpCertInfo:    kcpCertInfo,
+		returnUrl:      returnUrl,
+		escwUsedYN:     "N",
+		privateKeyPath: privateKeyPath,
+		privateKey:     pkey,
+	}, nil
 }
 
 func (u *payKcpUsc) Register(ctx context.Context,
@@ -90,4 +112,53 @@ func (u *payKcpUsc) Approve(ctx context.Context, data kcpdto.OrderResponse) (kcp
 	}
 
 	return u.svc.Approve(ctx, req)
+}
+
+func (u *payKcpUsc) RefundAll(ctx context.Context, siteCd, tno string) (kcpdto.RefundResponse, error) {
+	modType := kcpdto.ModTypeRefundAll
+
+	signature, err := sign(u.privateKey, []byte(siteCd+"^"+tno+"^"+modType))
+	if err != nil {
+		return kcpdto.NilRefundResponse, err
+	}
+	req := kcpdto.RefundRequest{
+		SiteCd:      siteCd,
+		KcpCertInfo: u.kcpCertInfo,
+		KcpSignData: signature,
+		ModType:     modType,
+		Tno:         tno,
+	}
+
+	return u.svc.Refund(ctx, req)
+}
+
+func loadDecryptedPrivateKey(keyPath string) (*rsa.PrivateKey, error) {
+	bytes, err := ioutil.ReadFile(keyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	privatePem, _ := pem.Decode(bytes)
+	fmt.Println(privatePem)
+
+	key, err := x509.ParsePKCS1PrivateKey(privatePem.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
+}
+func sign(priavateKey *rsa.PrivateKey, data []byte) (string, error) {
+	h := sha256.New()
+	_, err := h.Write(data)
+	if err != nil {
+		return "", err
+	}
+
+	signature, err := rsa.SignPKCS1v15(rand.Reader, priavateKey, crypto.SHA256, h.Sum(nil))
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(signature), nil
 }

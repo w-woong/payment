@@ -5,6 +5,9 @@ import "encoding/json"
 var (
 	NilRegistrationResponse = RegistrationResponse{}
 	NilOrderRequest         = OrderRequest{}
+
+	NilRefundRequest  = RefundRequest{}
+	NilRefundResponse = RefundResponse{}
 )
 
 const (
@@ -20,6 +23,10 @@ const (
 )
 const (
 	ActionResultCard = "card"
+)
+const (
+	ModTypeRefundAll  = "STSC"
+	ModTypeRefundPart = "STPC"
 )
 
 type Registration struct {
@@ -225,4 +232,31 @@ type ApprovalResponse struct {
 	ResGreenDepositMny string `json:"res_green_deposit_mny"`
 	ResTaxMny          string `json:"res_tax_mny"`
 	AppNo              string `json:"app_no"`
+
+	SiteCd string `json:"site_cd,omitempty"`
+}
+
+type RefundRequest struct {
+	SiteCd      string `json:"site_cd"`
+	KcpCertInfo string `json:"kcp_cert_info"`
+	KcpSignData string `json:"kcp_sign_data"`
+	ModType     string `json:"mod_type"`
+	Tno         string `json:"tno"`
+
+	ModMny  string `json:"mod_mny"`
+	RemMny  string `json:"rem_mny"`
+	ModDesc string `json:"mod_desc"`
+}
+
+type RefundResponse struct {
+	ResCd        string `json:"res_cd"`
+	ResMsg       string `json:"res_msg"`
+	Tno          string `json:"tno"`
+	CancTime     string `json:"canc_time"`
+	ModMny       string `json:"mod_mny"`
+	RemMny       string `json:"rem_mny"`
+	ModPacnSeqNo string `json:"mod_pacn_seq_no"`
+	CardModMny   string `json:"card_mod_mny"`
+
+	SiteCd string `json:"site_cd,omitempty"`
 }

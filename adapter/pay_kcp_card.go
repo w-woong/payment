@@ -81,5 +81,24 @@ func (a *payKcpCard) Approve(ctx context.Context, req kcpdto.ApprovalRequest) (k
 		return kcpdto.NilApprovalResponse, err
 	}
 
+	res.SiteCd = req.SiteCd
+
+	return res, nil
+}
+
+func (a *payKcpCard) Refund(ctx context.Context, req kcpdto.RefundRequest) (kcpdto.RefundResponse, error) {
+
+	resBody, err := a.client.RequestPostContext(ctx, "/gw/mod/v1/cancel", nil, &req)
+	if err != nil {
+		return kcpdto.NilRefundResponse, err
+	}
+
+	res := kcpdto.RefundResponse{}
+	if err = json.Unmarshal(resBody, &res); err != nil {
+		return kcpdto.NilRefundResponse, err
+	}
+
+	res.SiteCd = req.SiteCd
+
 	return res, nil
 }
