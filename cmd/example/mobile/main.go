@@ -271,7 +271,7 @@ func refund(appr kcpdto.ApprovalResponse) (kcpdto.RefundResponse, error) {
 		sihttp.WithDefaultHeaders(headers),
 	)
 
-	pkey, err := loadDecryptedPrivateKey("./certs/dec.pem")
+	pkey, err := loadDecryptedPrivateKey("./certs/kcp/dec.pem")
 	if err != nil {
 		fmt.Println(err)
 		return kcpdto.NilRefundResponse, err

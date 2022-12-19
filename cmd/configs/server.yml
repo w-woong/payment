@@ -1,0 +1,81 @@
+
+logger:
+  json: true
+  stdout: true
+  file:
+    name: 'logs/agent.log'
+    max_size: 50
+    max_backup: 100
+    max_age: 31
+    compressed: true
+  level: 'debug'
+
+server:
+  http:
+    timeout: 6
+    hmac_header: ''
+    hmac_secret: 'ab2316584873095f017f6dfa7a9415794f563fcc473eb3fe65b9167e37fd5a4b'
+    bearer_token: 'ab2316584873095f017f6dfa7a9415794f563fcc473eb3fe65b9167e37fd5a4b'
+    jwt:
+      secret: 'ab2316584873095f017f6dfa7a9415794f563fcc473eb3fe65b9167e37fd5a4b'
+      access_token_exp: 1
+      refresh_token: true
+      refresh_token_exp: 10
+    allowed_origins: '*'
+    allowed_headers: 'X-Requested-With,Content-Type,Authorization'
+    allowed_methods: 'GET,POST,PUT,DELETE,HEAD'
+
+  repo:
+    driver: 'pgx'
+    conn_str: 'host=testpghost user=test password=test123 dbname=woong_user port=5432 sslmode=disable TimeZone=Asia/Seoul'
+    # used when driver is oci8, postgres, mssql...
+    max_idle_conns: 25
+    max_open_conns: 25
+    conn_max_lifetime_in_min: 15
+
+client:
+  payment:
+    pg_type: 'kcp'
+    client_type: 'mobile'
+    pg:
+      url: 'https://stg-spl.kcp.co.kr'
+      client_id: 'T0000'
+      raw_certificate: '-----BEGIN CERTIFICATE-----MIIDgTCCAmmgAwIBAgIHBy4lYNG7ojANBgkqhkiG9w0BAQsFADBzMQswCQYDVQQGEwJLUjEOMAwGA1UECAwFU2VvdWwxEDAOBgNVBAcMB0d1cm8tZ3UxFTATBgNVBAoMDE5ITktDUCBDb3JwLjETMBEGA1UECwwKSVQgQ2VudGVyLjEWMBQGA1UEAwwNc3BsLmtjcC5jby5rcjAeFw0yMTA2MjkwMDM0MzdaFw0yNjA2MjgwMDM0MzdaMHAxCzAJBgNVBAYTAktSMQ4wDAYDVQQIDAVTZW91bDEQMA4GA1UEBwwHR3Vyby1ndTERMA8GA1UECgwITG9jYWxXZWIxETAPBgNVBAsMCERFVlBHV0VCMRkwFwYDVQQDDBAyMDIxMDYyOTEwMDAwMDI0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAppkVQkU4SwNTYbIUaNDVhu2w1uvG4qip0U7h9n90cLfKymIRKDiebLhLIVFctuhTmgY7tkE7yQTNkD+jXHYufQ/qj06ukwf1BtqUVru9mqa7ysU298B6l9v0Fv8h3ztTYvfHEBmpB6AoZDBChMEua7Or/L3C2vYtU/6lWLjBT1xwXVLvNN/7XpQokuWq0rnjSRThcXrDpWMbqYYUt/CL7YHosfBazAXLoN5JvTd1O9C3FPxLxwcIAI9H8SbWIQKhap7JeA/IUP1Vk4K/o3Yiytl6Aqh3U1egHfEdWNqwpaiHPuM/jsDkVzuS9FV4RCdcBEsRPnAWHz10w8CX7e7zdwIDAQABox0wGzAOBgNVHQ8BAf8EBAMCB4AwCQYDVR0TBAIwADANBgkqhkiG9w0BAQsFAAOCAQEAg9lYy+dM/8Dnz4COc+XIjEwr4FeC9ExnWaaxH6GlWjJbB94O2L26arrjT2hGl9jUzwd+BdvTGdNCpEjOz3KEq8yJhcu5mFxMskLnHNo1lg5qtydIID6eSgew3vm6d7b3O6pYd+NHdHQsuMw5S5z1m+0TbBQkb6A9RKE1md5/Yw+NymDy+c4NaKsbxepw+HtSOnma/R7TErQ/8qVioIthEpwbqyjgIoGzgOdEFsF9mfkt/5k6rR0WX8xzcro5XSB3T+oecMS54j0+nHyoS96/llRLqFDBUfWn5Cay7pJNWXCnw4jIiBsTBa3q95RVRyMEcDgPwugMXPXGBwNoMOOpuQ==-----END CERTIFICATE-----'
+      return_url: 'https://localhost:8099/callback'
+      private_key_file_to_sign: './certs/kcp/dec.pem'
+      trade_request_html_file: 'resources/html/kcp_mobile_trade_request.html'
+	    # 결제 수단 정보 설정
+	    # 결제에 필요한 결제 수단 정보를 설정합니다.
+	    #
+	    # 신용카드 : 100000000000, 계좌이체 : 010000000000, 가상계좌 : 001000000000
+	    # 포인트   : 000100000000, 휴대폰   : 000010000000, 상품권   : 000000001000
+	    #
+	    # 위와 같이 설정한 경우 표준웹에서 설정한 결제수단이 표시됩니다.
+	    # 표준웹에서 여러 결제수단을 표시하고 싶으신 경우 설정하시려는 결제
+	    # 수단에 해당하는 위치에 해당하는 값을 1로 변경하여 주십시오.
+	    #
+	    # 예) 신용카드, 계좌이체, 가상계좌를 동시에 표시하고자 하는 경우
+	    # pay_method = "111000000000"
+	    # 신용카드(100000000000), 계좌이체(010000000000), 가상계좌(001000000000)에
+	    # 해당하는 값을 모두 더해주면 됩니다.
+	    #
+	    # ※ 필수
+	    #  KCP에 신청된 결제수단으로만 결제가 가능합니다.
+      allowed_pay_methods: '100000000000'
+      shop_name: 'Test Shop'
+  oauth2:
+    id_token_validators:
+      - type: 'jwks'
+        token:
+          source: 'google'
+          id_key_name: 'tid'
+          id_token_key_name: 'id_token'
+          token_source_key_name: 'token_source'
+        openid_conf_url: 'https://accounts.google.com/.well-known/openid-configuration'
+      - type: 'jwks'
+        token:
+          source: 'woong'
+          id_key_name: 'tid'
+          id_token_key_name: 'id_token'
+          token_source_key_name: 'token_source'
+        openid_conf_url: 'https://accounts.google.com/.well-known/openid-configuration'
