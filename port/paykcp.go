@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+	"io"
 
 	"github.com/w-woong/payment/dto/kcpdto"
 )
@@ -17,6 +18,7 @@ type PayKcpUsc interface {
 		orderNum string, orderAmt float64, productName string,
 		buyerName, buyerMobile, buyerEmail, quota, shopName string) (kcpdto.OrderRequest, error)
 
+	Order(ctx context.Context, w io.Writer, order kcpdto.OrderRequest) error
 	Approve(ctx context.Context, data kcpdto.OrderResponse) (kcpdto.ApprovalResponse, error)
 	RefundAll(ctx context.Context, siteCd, tno string) (kcpdto.RefundResponse, error)
 }

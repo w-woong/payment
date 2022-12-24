@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/w-woong/common/logger"
 	"github.com/w-woong/payment/dto/kcpdto"
 	"github.com/w-woong/payment/port"
 )
@@ -22,21 +23,27 @@ func NewPayKcpHttpHandler(timeout time.Duration, usc port.PayKcpUsc) *PayKcpHttp
 }
 
 func (d *PayKcpHttpHandler) HandleRegisterCard(w http.ResponseWriter, r *http.Request) {
-	orderNum := ""
-	var orderAmt float64 = 0
-	productName := ""
-	buyerName := ""
-	buyerMobile := ""
-	buyerEmail := ""
-	quota := ""
-	shopName := ""
+	ctx := r.Context()
 
-	orderReq, err := d.usc.Register(r.Context(), orderNum, orderAmt, productName, buyerName, buyerMobile, buyerEmail, quota, shopName)
+	orderNum := "TEST1234567890"
+	var orderAmt float64 = 1004
+	productName := "TEST상품"
+	buyerName := "홍길동"
+	buyerMobile := "010-0000-0000"
+	buyerEmail := "test@test.co.kr"
+	quota := "0"
+	shopName := "TEST SITE"
+
+	orderReq, err := d.usc.Register(ctx, orderNum, orderAmt, productName, buyerName, buyerMobile, buyerEmail, quota, shopName)
 	if err != nil {
+		logger.Error(err.Error())
 		return
 	}
 
-	fmt.Println(orderReq)
+	if err = d.usc.Order(ctx, w, orderReq); err != nil {
+		logger.Error(err.Error())
+		return
+	}
 }
 
 func (d *PayKcpHttpHandler) HandleOrderCardCallback(w http.ResponseWriter, r *http.Request) {

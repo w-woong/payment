@@ -10,7 +10,9 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"text/template"
 
 	"github.com/w-woong/payment/dto/kcpdto"
 	"github.com/w-woong/payment/port"
@@ -19,30 +21,38 @@ import (
 type payKcpUsc struct {
 	svc port.PayKcpSvc
 
-	siteCd           string
-	kcpCertInfo      string
-	allowedPayMethod string
-	returnUrl        string
-	escwUsedYN       string
-	privateKeyPath   string
-	privateKey       *rsa.PrivateKey
+	siteCd               string
+	kcpCertInfo          string
+	allowedPayMethod     string
+	returnUrl            string
+	escwUsedYN           string
+	privateKeyPath       string
+	privateKey           *rsa.PrivateKey
+	tradeRequestHtmlFile string
+	tradeRequestTemplate *template.Template
 }
 
 func NewPayKcpUsc(svc port.PayKcpSvc, siteCd, kcpCertInfo, allowedPayMethod, returnUrl string,
-	privateKeyPath string) (*payKcpUsc, error) {
+	privateKeyPath string, tradeRequestHtmlFile string) (*payKcpUsc, error) {
 
 	pkey, err := loadDecryptedPrivateKey(privateKeyPath)
 	if err != nil {
 		return nil, err
 	}
+
+	tmpl := template.Must(template.ParseFiles(tradeRequestHtmlFile))
+
 	return &payKcpUsc{
-		svc:            svc,
-		siteCd:         siteCd,
-		kcpCertInfo:    kcpCertInfo,
-		returnUrl:      returnUrl,
-		escwUsedYN:     "N",
-		privateKeyPath: privateKeyPath,
-		privateKey:     pkey,
+		svc:                  svc,
+		siteCd:               siteCd,
+		kcpCertInfo:          kcpCertInfo,
+		allowedPayMethod:     allowedPayMethod,
+		returnUrl:            returnUrl,
+		escwUsedYN:           "N",
+		privateKeyPath:       privateKeyPath,
+		privateKey:           pkey,
+		tradeRequestHtmlFile: tradeRequestHtmlFile,
+		tradeRequestTemplate: tmpl,
 	}, nil
 }
 
@@ -99,6 +109,10 @@ func (u *payKcpUsc) Register(ctx context.Context,
 	}
 
 	return order, nil
+}
+
+func (u *payKcpUsc) Order(ctx context.Context, w io.Writer, order kcpdto.OrderRequest) error {
+	return u.tradeRequestTemplate.Execute(w, &order)
 }
 
 func (u *payKcpUsc) Approve(ctx context.Context, data kcpdto.OrderResponse) (kcpdto.ApprovalResponse, error) {

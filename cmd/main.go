@@ -155,21 +155,23 @@ func main() {
 	}
 
 	// service
+	var kcpUsc port.PayKcpUsc
 	switch conf.Client.Payment.PgType {
 	case "kcp":
+		var payService port.PayKcpSvc = adapter.NewPayKcpCard(sihttp.DefaultInsecureClient(), conf.Client.Payment.PG.Url)
+		kcpUsc, err = usecase.NewPayKcpUsc(payService,
+			conf.Client.Payment.PG.ClientID,
+			conf.Client.Payment.PG.RawCertificate,
+			conf.Client.Payment.PG.AllowedPayMethods,
+			conf.Client.Payment.PG.ReturnUrl,
+			conf.Client.Payment.PG.PrivateKeyFileToSign,
+			conf.Client.Payment.PG.TradeRequestHtmlFile)
+		if err != nil {
+			logger.Error(err.Error())
+			os.Exit(1)
+		}
 	default:
 		logger.Error(conf.Client.Payment.PgType + " is not allowed")
-		os.Exit(1)
-	}
-	var payService port.PayKcpSvc = adapter.NewPayKcpCard(sihttp.DefaultInsecureClient(), conf.Client.Payment.PG.Url)
-	usc, err := usecase.NewPayKcpUsc(payService,
-		conf.Client.Payment.PG.ClientID,
-		conf.Client.Payment.PG.RawCertificate,
-		conf.Client.Payment.PG.AllowedPayMethods,
-		conf.Client.Payment.PG.ReturnUrl,
-		conf.Client.Payment.PG.PrivateKeyFileToSign)
-	if err != nil {
-		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
@@ -213,7 +215,7 @@ func main() {
 
 	// http handler
 	router := mux.NewRouter()
-	route.PayRoute(router, conf.Server.Http, idTokenValidators, usc, userSvc)
+	route.PayRoute(router, conf.Server.Http, idTokenValidators, kcpUsc, userSvc)
 
 	// http server
 	tlsConfig := sihttp.CreateTLSConfigMinTls(tls.VersionTLS12)

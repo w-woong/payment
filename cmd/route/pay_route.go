@@ -1,6 +1,7 @@
 package route
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -15,6 +16,8 @@ func PayRoute(router *mux.Router, conf common.ConfigHttp,
 
 	handler := delivery.NewPayKcpHttpHandler(time.Duration(conf.Timeout)*time.Second, usc)
 
+	router.HandleFunc("/v1/payment", handler.HandleRegisterCard).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc("/v1/payment/callback", handler.HandleOrderCardCallback).Methods(http.MethodGet, http.MethodPost)
 	// router.HandleFunc("/v1/order/cart", middlewares.AuthIDTokenUserAccountHandler(
 	// 	handler.HandleFindByUserID, validator, userSvc,
 	// )).Methods(http.MethodGet)
