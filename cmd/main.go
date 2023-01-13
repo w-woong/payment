@@ -52,7 +52,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&addr, "addr", ":49003", "listen address")
+	flag.StringVar(&addr, "addr", ":49005", "listen address")
 	flag.BoolVar(&printVersion, "version", false, "print version")
 	flag.IntVar(&tickIntervalSec, "tick", 30, "tick interval in second")
 	flag.StringVar(&certKey, "key", "./certs/server.key", "server key")
