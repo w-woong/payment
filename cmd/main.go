@@ -49,6 +49,8 @@ var (
 
 	usePprof  = false
 	pprofAddr = ":56060"
+
+	autoMigrate = false
 )
 
 func init() {
@@ -64,6 +66,7 @@ func init() {
 
 	flag.BoolVar(&usePprof, "pprof", false, "use pprof")
 	flag.StringVar(&pprofAddr, "pprof_addr", ":56060", "pprof listen address")
+	flag.BoolVar(&autoMigrate, "autoMigrate", false, "auto migrate")
 
 	flag.Parse()
 }
