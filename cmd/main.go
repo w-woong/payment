@@ -21,7 +21,6 @@ import (
 	"github.com/w-woong/common/logger"
 	commonport "github.com/w-woong/common/port"
 	"github.com/w-woong/common/txcom"
-	"github.com/w-woong/common/utils"
 	"github.com/w-woong/common/wrapper"
 	"github.com/w-woong/payment/adapter"
 	"github.com/w-woong/payment/cmd/route"
@@ -178,33 +177,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// oauth2
-	idTokenValidators := make(commonport.IDTokenValidators)
-	for _, v := range conf.Client.Oauth2.IDTokenValidators {
-		if v.Type == "jwks" {
-			jwksUrl, err := utils.GetJwksUrl(v.OpenIDConfUrl)
-			if err != nil {
-				logger.Error(err.Error())
-				os.Exit(1)
-			}
-			jwksStore, err := utils.NewJwksCache(jwksUrl)
-			if err != nil {
-				logger.Error(err.Error())
-				os.Exit(1)
-			}
-			validator := commonadapter.NewJwksIDTokenValidator(jwksStore, v.Token.TokenSourceKeyName, v.Token.IDKeyName, v.Token.IDTokenKeyName)
-			idTokenValidators[v.Token.Source] = validator
-		}
-	}
-
 	var userSvc commonport.UserSvc
 	if conf.Client.UserHttp.Url != "" {
 		userSvc = commonadapter.NewUserHttp(sihttp.DefaultInsecureClient(),
 			// conf.Client.Oauth2.Token.Source,
-			conf.Client.UserHttp.Url,
-			conf.Client.UserHttp.BearerToken,
-			conf.Client.Oauth2.Token.TokenSourceKeyName,
-			conf.Client.Oauth2.Token.IDKeyName, conf.Client.Oauth2.Token.IDTokenKeyName)
+			conf.Client.UserHttp.Url)
 	} else if conf.Client.UserGrpc.Addr != "" {
 		conn, err := wrapper.NewGrpcClient(conf.Client.UserGrpc, false)
 		if err != nil {
@@ -218,7 +195,7 @@ func main() {
 
 	// http handler
 	router := mux.NewRouter()
-	route.PayRoute(router, conf.Server.Http, idTokenValidators, kcpUsc, userSvc)
+	route.PayRoute(router, conf.Server.Http, kcpUsc, userSvc)
 
 	// http server
 	tlsConfig := sihttp.CreateTLSConfigMinTls(tls.VersionTLS12)

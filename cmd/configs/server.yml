@@ -46,19 +46,9 @@ client:
       trade_request_html_file: 'resources/html/kcp_mobile_trade_request.html'
       allowed_pay_methods: '100000000000'
       shop_name: 'Test Shop'
+
+  id_token_cookie: 'id_token'
   oauth2:
-    id_token_validators:
-      - type: 'jwks'
-        token:
-          source: 'google'
-          id_key_name: 'tid'
-          id_token_key_name: 'id_token'
-          token_source_key_name: 'token_source'
-        openid_conf_url: 'https://accounts.google.com/.well-known/openid-configuration'
-      - type: 'jwks'
-        token:
-          source: 'woong'
-          id_key_name: 'tid'
-          id_token_key_name: 'id_token'
-          token_source_key_name: 'token_source'
-        openid_conf_url: 'https://accounts.google.com/.well-known/openid-configuration'
+    integrated:
+      openid_conf_url: 'http://localhost:5558/.well-known/openid-configuration'
+      
