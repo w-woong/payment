@@ -11,9 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-wonk/si"
-	"github.com/go-wonk/si/sigorm"
-	"github.com/go-wonk/si/sihttp"
+	"github.com/go-wonk/si/v2"
+	"github.com/go-wonk/si/v2/sigorm"
+	"github.com/go-wonk/si/v2/sihttp"
 	"github.com/gorilla/mux"
 	"github.com/w-woong/common"
 	commonadapter "github.com/w-woong/common/adapter"
@@ -160,7 +160,8 @@ func main() {
 	var kcpUsc port.PayKcpUsc
 	switch conf.Client.Payment.PgType {
 	case "kcp":
-		var payService port.PayKcpSvc = adapter.NewPayKcpCard(sihttp.DefaultInsecureClient(), conf.Client.Payment.PG.Url)
+		// TODO: change http client config
+		var payService port.PayKcpSvc = adapter.NewPayKcpCard(sihttp.DefaultInsecureStandardClient(), conf.Client.Payment.PG.Url)
 		kcpUsc, err = usecase.NewPayKcpUsc(payService,
 			conf.Client.Payment.PG.ClientID,
 			conf.Client.Payment.PG.RawCertificate,
@@ -179,7 +180,8 @@ func main() {
 
 	var userSvc commonport.UserSvc
 	if conf.Client.UserHttp.Url != "" {
-		userSvc = commonadapter.NewUserHttp(sihttp.DefaultInsecureClient(),
+		client := conf.Client.UserHttp.NewHttpClient()
+		userSvc = commonadapter.NewUserHttp(client,
 			// conf.Client.Oauth2.Token.Source,
 			conf.Client.UserHttp.Url)
 	} else if conf.Client.UserGrpc.Addr != "" {

@@ -19,8 +19,8 @@ import (
 	"net/http/httputil"
 	"os"
 
-	"github.com/go-wonk/si/sicore"
-	"github.com/go-wonk/si/sihttp"
+	"github.com/go-wonk/si/v2/sicore"
+	"github.com/go-wonk/si/v2/sihttp"
 	"github.com/gorilla/mux"
 	"github.com/w-woong/payment/dto/kcpdto"
 )
@@ -198,7 +198,7 @@ func handleFileServe(next http.Handler) http.Handler {
 //
 
 func registerTrade(req kcpdto.RegistrationRequest) (kcpdto.RegistrationResponse, error) {
-	c := sihttp.DefaultInsecureClient()
+	c := sihttp.DefaultInsecureStandardClient()
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/json; charset=utf-8"
@@ -218,7 +218,7 @@ func registerTrade(req kcpdto.RegistrationRequest) (kcpdto.RegistrationResponse,
 	// fmt.Println(res.String())
 
 	res := kcpdto.RegistrationResponse{}
-	resBody, err := client.RequestPostContext(context.Background(), "/std/tradeReg/register", nil, &req)
+	resBody, err := client.PostContext(context.Background(), "/std/tradeReg/register", nil, &req)
 	if err != nil {
 		return kcpdto.NilRegistrationResponse, err
 	}
@@ -231,7 +231,7 @@ func registerTrade(req kcpdto.RegistrationRequest) (kcpdto.RegistrationResponse,
 }
 
 func approve(req kcpdto.ApprovalRequest) (kcpdto.ApprovalResponse, error) {
-	c := sihttp.DefaultInsecureClient()
+	c := sihttp.DefaultInsecureStandardClient()
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/json; charset=utf-8"
@@ -244,7 +244,7 @@ func approve(req kcpdto.ApprovalRequest) (kcpdto.ApprovalResponse, error) {
 	)
 
 	res := kcpdto.ApprovalResponse{}
-	resBody, err := client.RequestPostContext(context.Background(), "/gw/enc/v1/payment", nil, &req)
+	resBody, err := client.PostContext(context.Background(), "/gw/enc/v1/payment", nil, &req)
 	if err != nil {
 		return kcpdto.NilApprovalResponse, err
 	}
@@ -259,7 +259,7 @@ func approve(req kcpdto.ApprovalRequest) (kcpdto.ApprovalResponse, error) {
 }
 
 func refund(appr kcpdto.ApprovalResponse) (kcpdto.RefundResponse, error) {
-	c := sihttp.DefaultInsecureClient()
+	c := sihttp.DefaultInsecureStandardClient()
 
 	headers := make(map[string]string)
 	headers["Content-Type"] = "application/json; charset=utf-8"
@@ -291,7 +291,7 @@ func refund(appr kcpdto.ApprovalResponse) (kcpdto.RefundResponse, error) {
 		Tno:         appr.Tno,
 	}
 
-	resBody, err := client.RequestPostContext(context.Background(), "/gw/mod/v1/cancel", nil, &req)
+	resBody, err := client.PostContext(context.Background(), "/gw/mod/v1/cancel", nil, &req)
 	if err != nil {
 		return kcpdto.NilRefundResponse, err
 	}

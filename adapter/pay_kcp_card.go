@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/go-wonk/si/sicore"
-	"github.com/go-wonk/si/sihttp"
+	"github.com/go-wonk/si/v2/sicore"
+	"github.com/go-wonk/si/v2/sihttp"
 	"github.com/w-woong/payment/dto/kcpdto"
 )
 
@@ -49,7 +49,7 @@ func NewPayKcpCard(client *http.Client, baseUrl string) *payKcpCard {
 
 func (a *payKcpCard) Register(ctx context.Context, req kcpdto.RegistrationRequest) (kcpdto.RegistrationResponse, error) {
 
-	resBody, err := a.client.RequestPostContext(ctx, "/std/tradeReg/register", nil, &req)
+	resBody, err := a.client.PostContext(ctx, "/std/tradeReg/register", nil, &req)
 	if err != nil {
 		return kcpdto.NilRegistrationResponse, err
 	}
@@ -71,7 +71,7 @@ func (a *payKcpCard) Approve(ctx context.Context, req kcpdto.ApprovalRequest) (k
 	// 	OrdrMony:    payAmount,
 	// }
 
-	resBody, err := a.client.RequestPostContext(ctx, "/gw/enc/v1/payment", nil, &req)
+	resBody, err := a.client.PostContext(ctx, "/gw/enc/v1/payment", nil, &req)
 	if err != nil {
 		return kcpdto.NilApprovalResponse, err
 	}
@@ -88,7 +88,7 @@ func (a *payKcpCard) Approve(ctx context.Context, req kcpdto.ApprovalRequest) (k
 
 func (a *payKcpCard) Refund(ctx context.Context, req kcpdto.RefundRequest) (kcpdto.RefundResponse, error) {
 
-	resBody, err := a.client.RequestPostContext(ctx, "/gw/mod/v1/cancel", nil, &req)
+	resBody, err := a.client.PostContext(ctx, "/gw/mod/v1/cancel", nil, &req)
 	if err != nil {
 		return kcpdto.NilRefundResponse, err
 	}
